@@ -253,6 +253,7 @@ Definition sign_plus (n: sign) (m: sign) : SignSet.t :=
   end.
 
 
+(* using recursion with gas to cut the cases in half *)
 Fixpoint sign_plus_aux (n: sign) (m: sign) (g: nat) {struct g}: SignSet.t :=
   match n, m, g with
     Neg, Pos, _ => AllSigns
@@ -265,13 +266,15 @@ Fixpoint sign_plus_aux (n: sign) (m: sign) (g: nat) {struct g}: SignSet.t :=
 
 Definition sign_plus_2 n m := sign_plus_aux n m 1.
 
-Lemma sign_plus_equal: forall n m, sign_plus n m = sign_plus_2 n m.
+(* proof we wrote sign_plus_2 right *)
+Lemma sign_plus_equal_2: forall n m, sign_plus n m = sign_plus_2 n m.
 intros.
 unfold sign_plus; unfold sign_plus_2; unfold sign_plus_aux.
 case n, m; reflexivity.
 Qed.
 
-Definition signs_plus_fin (n:SignSet.t) (m:SignSet.t) : SignSet.t :=
+(* finite set version of signset_plus *)
+Definition signset_plus_fin (n:SignSet.t) (m:SignSet.t) : SignSet.t :=
   let elts := list_prod (SignSet.elements n) (SignSet.elements m)
   in let alphas :=  map (prod_curry sign_plus) elts
   in fold_left SignSet.union alphas SignSet.empty.
@@ -280,11 +283,12 @@ Definition signs_plus_fin (n:SignSet.t) (m:SignSet.t) : SignSet.t :=
 Compute a_plus_fin (fromList (Neg::Zero::nil)) (fromList (Zero::nil)).
 *)
 
-Lemma alpha_aux_p: forall n m, SignSet.Subset (sign_of (n + m)) (signs_plus_fin (sign_of n) (sign_of m)).
+(* /almost/ a proof of soundness of signset_plus_fin *)
+Lemma signset_plus_fin_kinda_sound: forall n m, SignSet.Subset (sign_of (n + m)) (signset_plus_fin (sign_of n) (sign_of m)).
 intros.
 unfold SignSet.Subset.
 case_eq n; case_eq m; 
-unfold sign_of; unfold signs_plus_fin; simpl; intros;
+unfold sign_of; unfold signset_plus_fin; simpl; intros;
 try (apply SignSetProps.Dec.F.union_3; exact H1);
 apply in_allsigns.
 Qed.
