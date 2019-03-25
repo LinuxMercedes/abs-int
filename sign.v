@@ -296,8 +296,8 @@ Next Obligation. (* proving that n does in fact get smaller *)
 case_eq n; case_eq m; intros Hm Hn;
 rewrite Hm in *; rewrite Hn in *;
 specialize (H m); specialize (H1 n);
-try tauto;
-simpl; auto.
+try tauto; (* in cases where a hypothesis is false, derive a contradiction *)
+simpl; auto. (* in cases where the conclusion is true, compute sign_size *)
 Qed.
 (* all the other proof obligations are monotonous *)
 Solve Obligations of sign_plus_3_func with (repeat split; easy).
