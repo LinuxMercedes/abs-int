@@ -1,3 +1,7 @@
+(* Abstract Interpretation of Integers over Signs *)
+(* See <TBD> for an explanation of what follows *)
+
+
 (* Signs and sets of signs *)
 Inductive sign: Type :=
   Neg : sign
@@ -37,10 +41,8 @@ case x, y; simpl compare; intros H; try reflexivity; try discriminate H.
 Qed.
 
 
-
 Require Import MSets.
 Require Import Decidable.
-
 
 Module SignOTWL <: OrderedTypeWithLeibniz.
 Definition t := sign.
@@ -121,7 +123,6 @@ unfold AllSigns; simpl.
 case x; intuition.
 Qed.
 
-
 Lemma exists_in_singleton: forall s, exists t, SignSet.In t (SignSet.singleton s).
 intros.
 exists s.
@@ -129,11 +130,15 @@ apply SignSetProps.Dec.F.singleton_2.
 reflexivity.
 Qed.
 
+
+(* Sets of Integers *)
 Require Import ZArith.
 Open Scope Z_scope.
 
 Require Import Ensembles.
 
+
+(* Abstracting Sets of Integers to Sets of Signs *)
 Definition sign_of (n:Z) : signset :=
   match Z.compare n 0 with
     Eq => SignSet.singleton Zero
@@ -145,6 +150,7 @@ Definition sign_of (n:Z) : signset :=
 Definition alpha P s : Prop := exists n, P n /\ SignSet.In s (sign_of n).
 
 Definition gamma P n : Prop := exists s, P s /\ SignSet.In s (sign_of n).
+
 
 Lemma alpha_monotone: forall (P Q: Ensemble Z), (forall n, P n -> Q n) -> (forall s, (alpha P) s -> (alpha Q) s).
 intros P Q HPnQn.
@@ -218,6 +224,7 @@ exact Htp.
 Qed.
 
 
+(* Adding Sets of Integers *)
 Definition set_plus P Q x : Prop := exists n m, P n /\ Q m /\ n + m = x.
 
 Lemma sum_in_plus: forall n m (P Q: Z -> Prop), P n -> Q m -> (set_plus P Q) (n + m).
@@ -231,6 +238,7 @@ exact H0.
 Qed.
 
 
+(* Adding Sets of Signs *)
 Definition sign_plus (n: sign) (m: sign) : SignSet.t :=
   match n, m with
     Neg,  Neg  => SignSet.singleton Neg
@@ -272,8 +280,6 @@ Definition signs_plus_fin (n:SignSet.t) (m:SignSet.t) : SignSet.t :=
 Compute a_plus_fin (fromList (Neg::Zero::nil)) (fromList (Zero::nil)).
 *)
 
-
-
 Lemma alpha_aux_p: forall n m, SignSet.Subset (sign_of (n + m)) (signs_plus_fin (sign_of n) (sign_of m)).
 intros.
 unfold SignSet.Subset.
@@ -284,12 +290,11 @@ apply in_allsigns.
 Qed.
 
 
-
-
+(* Adding Sets of Integers *)
 Definition signset_plus P Q s : Prop := exists n m, P n /\ Q m /\ SignSet.In s (sign_plus n m).
 
 
-
+(* Proving The Signs Interpretation Sound *)
 Lemma signset_plus_sound: forall s (P Q: Ensemble Z), (alpha (set_plus P Q)) s -> (signset_plus (alpha P) (alpha Q)) s.
 intros s P Q.
 unfold alpha; unfold signset_plus.
