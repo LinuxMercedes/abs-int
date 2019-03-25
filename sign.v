@@ -273,6 +273,41 @@ unfold sign_plus; unfold sign_plus_2; unfold sign_plus_aux.
 case n, m; reflexivity.
 Qed.
 
+(* using recursion with a custom measure to prove termination *)
+(* a measure on signs *)
+Definition sign_size s : nat :=
+  match s with
+    Neg => 0
+  | Zero => 1
+  | Pos => 2
+  end.
+
+(* the function, wherein recursing results in the first argument getting smaller *)
+Require Import Program.Wf.
+Program Fixpoint sign_plus_3 (n: sign) (m: sign) { measure (sign_size n) } : SignSet.t :=
+  match n, m with
+    Neg, Pos => AllSigns
+  | Neg, _ => SignSet.singleton Neg
+  | Zero, Zero => SignSet.singleton Zero
+  | _, Pos => SignSet.singleton Pos
+  | _, _ => sign_plus_3 m n
+  end.
+Next Obligation. (* proving that n does in fact get smaller *)
+case_eq n; case_eq m; intros Hm Hn;
+rewrite Hm in *; rewrite Hn in *;
+specialize (H m); specialize (H1 n);
+try tauto;
+simpl; auto.
+Qed.
+(* all the other proof obligations are monotonous *)
+Solve Obligations of sign_plus_3_func with (repeat split; easy).
+
+(* proof of correctness *)
+Lemma sign_plus_equal_3: forall n m, sign_plus n m = sign_plus_3 n m.
+unfold sign_plus; unfold sign_plus_2; unfold sign_plus_aux.
+case n, m; reflexivity.
+Qed.
+
 (* finite set version of signset_plus *)
 Definition signset_plus_fin (n:SignSet.t) (m:SignSet.t) : SignSet.t :=
   let elts := list_prod (SignSet.elements n) (SignSet.elements m)
