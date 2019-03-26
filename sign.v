@@ -1,5 +1,5 @@
 (* Abstract Interpretation of Integers over Signs *)
-(* See <TBD> for an explanation of what follows *)
+(* See https://web.mst.edu/~nmjxv3/articles/coq/sign.html for an explanation of what follows *)
 
 
 (* Signs and sets of signs *)
