@@ -268,8 +268,6 @@ Definition sign_plus_2 n m := sign_plus_aux n m 1.
 
 (* proof we wrote sign_plus_2 right *)
 Lemma sign_plus_equal_2: forall n m, sign_plus n m = sign_plus_2 n m.
-intros.
-unfold sign_plus; unfold sign_plus_2; unfold sign_plus_aux.
 case n, m; reflexivity.
 Qed.
 
@@ -304,7 +302,6 @@ Solve Obligations of sign_plus_3_func with (repeat split; easy).
 
 (* proof of correctness *)
 Lemma sign_plus_equal_3: forall n m, sign_plus n m = sign_plus_3 n m.
-unfold sign_plus; unfold sign_plus_2; unfold sign_plus_aux.
 case n, m; reflexivity.
 Qed.
 
